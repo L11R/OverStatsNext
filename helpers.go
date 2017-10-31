@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/jasonlvhit/gocron"
 	"github.com/sdwolfe32/ovrstat/ovrstat"
+	"github.com/sirupsen/logrus"
 	"sort"
 	"strings"
-	"github.com/sirupsen/logrus"
 )
 
 func UpdateProfile(id int64, region string, nick string) {
@@ -33,13 +33,37 @@ func UpdateProfile(id int64, region string, nick string) {
 	}
 }
 
+func UpdateSomeProfiles(users []UserWithoutProfile) {
+	for _, user := range users {
+		go UpdateProfile(user.Id, user.Region, user.Nick)
+	}
+}
+
+func SplitUsers(users []UserWithoutProfile, lim int) [][]UserWithoutProfile {
+	var chunk []UserWithoutProfile
+	chunks := make([][]UserWithoutProfile, 0, len(users)/lim+1)
+
+	for len(users) >= lim {
+		chunk, users = users[:lim], users[lim:]
+		chunks = append(chunks, chunk)
+	}
+
+	if len(users) > 0 {
+		chunks = append(chunks, users[:])
+	}
+
+	return chunks
+}
+
 func UpdateAllProfiles() {
 	users, err := GetUsersWithoutProfile()
 	if err != nil {
 		log.Warn(err)
 	} else {
-		for _, user := range users {
-			go UpdateProfile(user.Id, user.Region, user.Nick)
+		users := SplitUsers(users, 5)
+		for _, groupOfUsers := range users {
+			//UpdateProfile(user.Id, user.Region, user.Nick)
+			UpdateSomeProfiles(groupOfUsers)
 		}
 	}
 }

@@ -80,7 +80,7 @@ func GetRatingTop(platform string, limit int) ([]User, error) {
 	return top, nil
 }
 
-func InsertUser(user User)  (r.WriteResponse, error) {
+func InsertUser(user User) (r.WriteResponse, error) {
 	var newDoc map[string]interface{}
 	if user.Nick == "" && user.Region == "" {
 		newDoc = map[string]interface{}{

@@ -61,7 +61,6 @@ func UpdateAllProfiles() {
 		wg.Add(len(users))
 
 		for _, group := range users {
-			//UpdateProfile(user.Id, user.Region, user.Nick)
 			go func(group []UserWithoutProfile) {
 				defer wg.Done()
 
@@ -76,7 +75,7 @@ func UpdateAllProfiles() {
 }
 
 func InitCron() {
-	gocron.Every(10).Seconds().Do(UpdateAllProfiles)
+	gocron.Every(1).Minutes().Do(UpdateAllProfiles)
 	<-gocron.Start()
 }
 

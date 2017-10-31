@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"sort"
 	"strings"
+	"sync"
 )
 
 func UpdateProfile(id int64, region string, nick string) {
@@ -33,12 +34,6 @@ func UpdateProfile(id int64, region string, nick string) {
 	}
 }
 
-func UpdateSomeProfiles(users []UserWithoutProfile) {
-	for _, user := range users {
-		go UpdateProfile(user.Id, user.Region, user.Nick)
-	}
-}
-
 func SplitUsers(users []UserWithoutProfile, lim int) [][]UserWithoutProfile {
 	var chunk []UserWithoutProfile
 	chunks := make([][]UserWithoutProfile, 0, len(users)/lim+1)
@@ -60,16 +55,28 @@ func UpdateAllProfiles() {
 	if err != nil {
 		log.Warn(err)
 	} else {
-		users := SplitUsers(users, 5)
-		for _, groupOfUsers := range users {
+		users := SplitUsers(users, 10)
+
+		var wg sync.WaitGroup
+		wg.Add(len(users))
+
+		for _, group := range users {
 			//UpdateProfile(user.Id, user.Region, user.Nick)
-			UpdateSomeProfiles(groupOfUsers)
+			go func(group []UserWithoutProfile) {
+				defer wg.Done()
+
+				for _, user := range group {
+					UpdateProfile(user.Id, user.Region, user.Nick)
+				}
+			}(group)
 		}
+
+		wg.Wait()
 	}
 }
 
 func InitCron() {
-	gocron.Every(1).Minutes().Do(UpdateAllProfiles)
+	gocron.Every(10).Seconds().Do(UpdateAllProfiles)
 	<-gocron.Start()
 }
 

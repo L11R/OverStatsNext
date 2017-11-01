@@ -11,7 +11,7 @@ func InitConnectionPool() {
 
 	dbUrl := os.Getenv("DB")
 	if dbUrl == "" {
-		log.Fatal("DB env variable not specified!")
+		log.Fatal("db env variable not specified")
 	}
 
 	session, err = r.Connect(r.ConnectOpts{
@@ -44,7 +44,7 @@ func GetUser(ID int) (User, error) {
 	var user User
 	err = res.One(&user)
 	if err == r.ErrEmptyResult {
-		return User{}, errors.New("DB: Row not found!")
+		return User{}, errors.New("db: row not found")
 	}
 	if err != nil {
 		return User{}, err
@@ -81,19 +81,12 @@ func GetRatingTop(platform string, limit int) ([]User, error) {
 }
 
 func InsertUser(user User) (r.WriteResponse, error) {
-	var newDoc map[string]interface{}
-	if user.Nick == "" && user.Region == "" {
-		newDoc = map[string]interface{}{
-			"id":      user.Id,
-			"profile": user.Profile,
-		}
-	} else {
-		newDoc = map[string]interface{}{
-			"id":      user.Id,
-			"profile": user.Profile,
-			"nick":    user.Nick,
-			"region":  user.Region,
-		}
+	newDoc := map[string]interface{}{
+		"id":      user.Id,
+		"profile": user.Profile,
+		"nick":    user.Nick,
+		"region":  user.Region,
+		"date":    r.Now(),
 	}
 
 	res, err := r.Table("users").Insert(newDoc, r.InsertOpts{
@@ -112,6 +105,7 @@ func UpdateUser(user User) (r.WriteResponse, error) {
 		newDoc = map[string]interface{}{
 			"id":      user.Id,
 			"profile": user.Profile,
+			"date":    r.Now(),
 		}
 	} else {
 		newDoc = map[string]interface{}{
@@ -119,6 +113,7 @@ func UpdateUser(user User) (r.WriteResponse, error) {
 			"profile": r.Literal(user.Profile),
 			"nick":    user.Nick,
 			"region":  user.Region,
+			"date":    r.Now(),
 		}
 	}
 
@@ -139,7 +134,7 @@ func GetUsersWithoutProfile() ([]UserWithoutProfile, error) {
 	var user []UserWithoutProfile
 	err = res.All(&user)
 	if err == r.ErrEmptyResult {
-		return []UserWithoutProfile{}, errors.New("DB: Row not found!")
+		return []UserWithoutProfile{}, errors.New("db: row not found")
 	}
 	if err != nil {
 		return []UserWithoutProfile{}, err

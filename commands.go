@@ -7,20 +7,20 @@ import (
 )
 
 func StartCommand(update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Use /help")
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Simple bot for Overwatch by @kraso\n\n"+
+		"<b>How to use:</b>\n"+
+		"1. Use /save to save your game profile.\n"+
+		"2. Use /me to see your stats.\n"+
+		"3. ???\n"+
+		"4. PROFIT!\n\n"+
+		"<b>Features:</b>\n"+
+		"— /me command\n"+
+		"— Reports after every game session\n"+
+		"— (soon)")
 	msg.ParseMode = "HTML"
 	bot.Send(msg)
 
 	log.Info("/start command executed successful")
-}
-
-func HelpCommand(update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "<code>/save eu|us|kr BattleTag-1337</code> — save your profile into DB\n"+
-		"<code>/me</code> — getting saved profile\n")
-	msg.ParseMode = "HTML"
-	bot.Send(msg)
-
-	log.Info("/help command executed successful")
 }
 
 type Hero struct {
@@ -75,10 +75,10 @@ func SaveCommand(update tgbotapi.Update) {
 			text = "ERROR:\n<code>" + fmt.Sprint(err) + "</code>"
 		} else {
 			_, err := InsertUser(User{
-				int64(update.Message.From.ID),
-				profile,
-				info[2],
-				info[1],
+				Id:      int64(update.Message.From.ID),
+				Profile: profile,
+				Region:  info[1],
+				Nick:    info[2],
 			})
 			if err != nil {
 				log.Warn(err)
@@ -89,7 +89,7 @@ func SaveCommand(update tgbotapi.Update) {
 			}
 		}
 	} else {
-		text = "Not enough arguments!"
+		text = "<b>Example:</b> <code>/save eu|us|kr|psn|xbl BattleTag-1337|ConsoleLogin</code> (sic, hyphen!)"
 	}
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
@@ -103,10 +103,11 @@ func MeCommand(update tgbotapi.Update) {
 
 	if err != nil {
 		log.Warn(err)
-		text = "ERROR:\n<code>" + fmt.Sprint(err) + "</code>"
+		text = fmt.Sprint("ERROR:\n<code>", err, "</code>")
 	} else {
 		log.Info("/me command executed successful")
 		text = MakeSummary(user.Profile)
+		text += fmt.Sprint("\n<b>Last Updated:</b> ", user.Date.Format("03:04:05 / 02.01.2006 GMT-07"))
 	}
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)

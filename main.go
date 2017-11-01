@@ -61,11 +61,6 @@ func main() {
 			go StartCommand(update)
 		}
 
-		if strings.HasPrefix(update.Message.Text, "/help") {
-			commandLogger.Info("command /help triggered")
-			go HelpCommand(update)
-		}
-
 		if strings.HasPrefix(update.Message.Text, "/save") {
 			commandLogger.Info("command /save triggered")
 			go SaveCommand(update)

@@ -11,6 +11,8 @@ import (
 	"sync"
 )
 
+var wg sync.WaitGroup
+
 func UpdateProfile(id int64, region string, nick string) {
 	profile, err := GetOverwatchProfile(region, nick)
 	if err != nil {
@@ -32,6 +34,8 @@ func UpdateProfile(id int64, region string, nick string) {
 			}).Infof("%s (%s) profile updated!", nick, region)
 		}
 	}
+
+	defer wg.Done()
 }
 
 func SplitUsers(users []UserWithoutProfile, lim int) [][]UserWithoutProfile {
@@ -55,27 +59,23 @@ func UpdateAllProfiles() {
 	if err != nil {
 		log.Warn(err)
 	} else {
-		users := SplitUsers(users, 10)
-
-		var wg sync.WaitGroup
-		wg.Add(len(users))
+		users := SplitUsers(users, 50)
 
 		for _, group := range users {
-			go func(group []UserWithoutProfile) {
-				defer wg.Done()
+			wg.Add(len(group))
 
-				for _, user := range group {
-					UpdateProfile(user.Id, user.Region, user.Nick)
-				}
-			}(group)
+			for _, user := range group {
+				go UpdateProfile(user.Id, user.Region, user.Nick)
+			}
+
+			wg.Wait()
 		}
-
-		wg.Wait()
 	}
 }
 
 func InitCron() {
 	gocron.Every(1).Minutes().Do(UpdateAllProfiles)
+	//gocron.Every(10).Seconds().Do(UpdateAllProfiles)
 	<-gocron.Start()
 }
 

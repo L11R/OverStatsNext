@@ -80,6 +80,24 @@ func GetRatingTop(platform string, limit int) ([]User, error) {
 	return top, nil
 }
 
+func GetRank(id int64, hero string, fieldType string, field string) (float64, error) {
+	res, err := r.Do(
+		r.Table("users").Count(),
+		r.Table("users").OrderBy(r.Asc(r.Row.Field("profile").Field("CompetitiveStats").Field("CareerStats").Field(hero).Field(fieldType).Field(field))).OffsetsOf(r.Row.Field("id").Eq(id)).Nth(0),
+		func(count r.Term, position r.Term) r.Term {
+			return position.Div(count).Mul(100)
+		},
+	).Run(session)
+
+	var rank float64
+	err = res.One(&rank)
+	if err != nil {
+		return 0, err
+	}
+
+	return rank, nil
+}
+
 func InsertUser(user User) (r.WriteResponse, error) {
 	newDoc := map[string]interface{}{
 		"id":      user.Id,

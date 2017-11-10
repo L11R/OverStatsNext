@@ -80,7 +80,8 @@ func InitCron() {
 }
 
 // Make small text summary based on profile
-func MakeSummary(profile *ovrstat.PlayerStats) string {
+func MakeSummary(user User) string {
+	profile := user.Profile
 	text := fmt.Sprintf("<b>%s</b> (<b>%d</b> sr / <b>%d</b> lvl)\n", profile.Name, profile.Rating, profile.Prestige*100+profile.Level)
 
 	if careerStats, ok := profile.CompetitiveStats.CareerStats["allHeroes"]; ok {
@@ -143,10 +144,13 @@ func MakeSummary(profile *ovrstat.PlayerStats) string {
 		}
 	}
 
+	text += fmt.Sprint("\n<b>Last Updated:</b>\n", user.Date.Format("15:04:05 / 02.01.2006 MST"))
+
 	return text
 }
 
-func MakeHeroSummary(hero string, profile *ovrstat.PlayerStats) string {
+func MakeHeroSummary(hero string, user User) string {
+	profile := user.Profile
 	text := fmt.Sprintf("<b>%s</b>", strings.Title(strings.ToLower(hero)))
 
 	if heroStats, ok := profile.CompetitiveStats.CareerStats[hero]; ok {
@@ -217,6 +221,8 @@ func MakeHeroSummary(hero string, profile *ovrstat.PlayerStats) string {
 	} else {
 		text += "\nNOT AVAILABLE"
 	}
+
+	text += fmt.Sprint("\n<b>Last Updated:</b>\n", user.Date.Format("15:04:05 / 02.01.2006 MST"))
 
 	return text
 }

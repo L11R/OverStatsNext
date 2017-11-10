@@ -42,28 +42,6 @@ func (hero Heroes) Swap(i, j int) {
 	hero[i], hero[j] = hero[j], hero[i]
 }
 
-func GetCommand(update tgbotapi.Update) {
-	info := strings.Split(update.Message.Text, " ")
-	var text string
-
-	if len(info) == 3 {
-		profile, err := GetOverwatchProfile(info[1], info[2])
-		if err != nil {
-			log.Warn(err)
-			text = "ERROR:\n<code>" + fmt.Sprint(err) + "</code>"
-		} else {
-			log.Info("/get command executed successful")
-			text = MakeSummary(profile)
-		}
-	} else {
-		text = "Not enough arguments!"
-	}
-
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
-	msg.ParseMode = "HTML"
-	bot.Send(msg)
-}
-
 func SaveCommand(update tgbotapi.Update) {
 	info := strings.Split(update.Message.Text, " ")
 	var text string
@@ -106,8 +84,7 @@ func MeCommand(update tgbotapi.Update) {
 		text = fmt.Sprint("ERROR:\n<code>", err, "</code>")
 	} else {
 		log.Info("/me command executed successful")
-		text = MakeSummary(user.Profile)
-		text += fmt.Sprint("\n<b>Last Updated:</b> ", user.Date.Format("03:04:05 / 02.01.2006 GMT-07"))
+		text = MakeSummary(user)
 	}
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
@@ -126,7 +103,7 @@ func HeroCommand(update tgbotapi.Update) {
 		log.Info("/h_ command executed successful")
 		hero := strings.Split(update.Message.Text, "_")[1]
 
-		text = MakeHeroSummary(hero, user.Profile)
+		text = MakeHeroSummary(hero, user)
 	}
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)

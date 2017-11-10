@@ -14,9 +14,9 @@ func StartCommand(update tgbotapi.Update) {
 		"3. ???\n"+
 		"4. PROFIT!\n\n"+
 		"<b>Features:</b>\n"+
-		"— /me command\n"+
-		"— Reports after every game session\n"+
-		"— (soon)")
+		"— Player profile (/me command)\n"+
+		"— Small summary for heroes\n"+
+		"— Reports after every game session\n")
 	msg.ParseMode = "HTML"
 	bot.Send(msg)
 

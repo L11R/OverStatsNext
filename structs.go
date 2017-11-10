@@ -5,19 +5,13 @@ import (
 	"time"
 )
 
+
 type User struct {
 	Id      int64                `gorethink:"id"`
 	Profile *ovrstat.PlayerStats `gorethink:"profile"`
 	Nick    string               `gorethink:"nick"`
 	Region  string               `gorethink:"region"`
 	Date    time.Time            `gorethink:"date"`
-}
-
-type UserWithoutProfile struct {
-	Id     int64     `gorethink:"id"`
-	Nick   string    `gorethink:"nick"`
-	Region string    `gorethink:"region"`
-	Date   time.Time `gorethink:"date"`
 }
 
 type Change struct {

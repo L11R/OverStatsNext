@@ -3,81 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/jasonlvhit/gocron"
 	"github.com/sdwolfe32/ovrstat/ovrstat"
-	"github.com/sirupsen/logrus"
 	"sort"
 	"strings"
-	"sync"
 )
-
-var wg sync.WaitGroup
-
-func UpdateProfile(id int64, region string, nick string) {
-	profile, err := GetOverwatchProfile(region, nick)
-	if err != nil {
-		log.WithFields(logrus.Fields{
-			"id": id,
-		}).Warn(err)
-	} else {
-		_, err := UpdateUser(User{
-			Id:      id,
-			Profile: profile,
-		})
-		if err != nil {
-			log.WithFields(logrus.Fields{
-				"id": id,
-			}).Warn(err)
-		} else {
-			log.WithFields(logrus.Fields{
-				"id": id,
-			}).Infof("%s (%s) profile updated!", nick, region)
-		}
-	}
-
-	defer wg.Done()
-}
-
-func SplitUsers(users []UserWithoutProfile, lim int) [][]UserWithoutProfile {
-	var chunk []UserWithoutProfile
-	chunks := make([][]UserWithoutProfile, 0, len(users)/lim+1)
-
-	for len(users) >= lim {
-		chunk, users = users[:lim], users[lim:]
-		chunks = append(chunks, chunk)
-	}
-
-	if len(users) > 0 {
-		chunks = append(chunks, users[:])
-	}
-
-	return chunks
-}
-
-func UpdateAllProfiles() {
-	users, err := GetUsersWithoutProfile()
-	if err != nil {
-		log.Warn(err)
-	} else {
-		users := SplitUsers(users, 50)
-
-		for _, group := range users {
-			wg.Add(len(group))
-
-			for _, user := range group {
-				go UpdateProfile(user.Id, user.Region, user.Nick)
-			}
-
-			wg.Wait()
-		}
-	}
-}
-
-func InitCron() {
-	gocron.Every(1).Minutes().Do(UpdateAllProfiles)
-	//gocron.Every(10).Seconds().Do(UpdateAllProfiles)
-	<-gocron.Start()
-}
 
 // Make small text summary based on profile
 func MakeSummary(user User) string {
@@ -227,7 +156,6 @@ func MakeHeroSummary(hero string, user User) string {
 	return text
 }
 
-//
 func AddInfo(name string, oldInfo int, newInfo int, diffInfo int) string {
 	text := fmt.Sprintf("%s:\n<code>%d | %d |", name, oldInfo, newInfo)
 	if diffInfo > 0 {

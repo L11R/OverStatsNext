@@ -35,9 +35,6 @@ func main() {
 	// Database pool init
 	go InitConnectionPool()
 
-	// Cron job
-	go InitCron()
-
 	// Debug log
 	bot.Debug = false
 
@@ -84,10 +81,5 @@ func main() {
 				go RatingTopCommand(update, "pc")
 			}
 		}
-
-		/*if strings.HasPrefix(update.Message.Text, "/get") {
-			commandLogger.Info("command /get triggered")
-			go GetCommand(update)
-		}*/
 	}
 }

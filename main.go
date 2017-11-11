@@ -58,6 +58,11 @@ func main() {
 			go StartCommand(update)
 		}
 
+		if strings.HasPrefix(update.Message.Text, "/donate") {
+			commandLogger.Info("command /donate triggered")
+			go DonateCommand(update)
+		}
+
 		if strings.HasPrefix(update.Message.Text, "/save") {
 			commandLogger.Info("command /save triggered")
 			go SaveCommand(update)

@@ -23,6 +23,15 @@ func StartCommand(update tgbotapi.Update) {
 	log.Info("/start command executed successful")
 }
 
+func DonateCommand(update tgbotapi.Update) {
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "If you find this bot helpful, " +
+		"<a href=\"https://paypal.me/krasovsky\">you can make small donation</a> to help me pay server bills!")
+	msg.ParseMode = "HTML"
+	bot.Send(msg)
+
+	log.Info("donate command executed successful")
+}
+
 type Hero struct {
 	Name                string
 	TimePlayedInSeconds int

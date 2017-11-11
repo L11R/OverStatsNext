@@ -18,7 +18,7 @@ var (
 
 func main() {
 	log.Formatter = new(logrus.TextFormatter)
-	log.Info("OverStatsNext 0.1 started!")
+	log.Info("OverStatsTelegram 1.0 started!")
 
 	var err error
 

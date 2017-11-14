@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-
 type User struct {
 	Id      int64                `gorethink:"id"`
 	Profile *ovrstat.PlayerStats `gorethink:"profile"`
@@ -26,4 +25,9 @@ type Report struct {
 	Wins   int `gorethink:"wins"`
 	Ties   int `gorethink:"ties"`
 	Losses int `gorethink:"losses"`
+}
+
+type Top struct {
+	Place int     `gorethink:"place"`
+	Rank  float64 `gorethink:"rank"`
 }

@@ -9,7 +9,7 @@ import (
 )
 
 // Make small text summary based on profile
-func MakeSummary(user User) string {
+func MakeSummary(user User, top Top) string {
 	profile := user.Profile
 	text := fmt.Sprintf("<b>%s</b> (<b>%d</b> sr / <b>%d</b> lvl)\n", profile.Name, profile.Rating, profile.Prestige*100+profile.Level)
 
@@ -50,6 +50,8 @@ func MakeSummary(user User) string {
 			kd.Ratio = kd.Eliminations / kd.Deaths
 			text += fmt.Sprintf("<b>%0.2f</b> k/d\n\n", kd.Ratio)
 		}
+
+		text += fmt.Sprintf("<b>Rating Top:</b>\n#%d (%0.2f%%)\n\n", top.Place, top.Rank)
 
 		text += "<b>7 top played heroes:</b>\n"
 		var topPlayedHeroes Heroes
@@ -152,19 +154,6 @@ func MakeHeroSummary(hero string, user User) string {
 	}
 
 	text += fmt.Sprint("\n<b>Last Updated:</b>\n", user.Date.Format("15:04:05 / 02.01.2006 MST"))
-
-	return text
-}
-
-func AddInfo(name string, oldInfo int, newInfo int, diffInfo int) string {
-	text := fmt.Sprintf("%s:\n<code>%d | %d |", name, oldInfo, newInfo)
-	if diffInfo > 0 {
-		text += fmt.Sprintf(" +%d 📈\n</code>", diffInfo)
-	} else if diffInfo == 0 {
-		text += fmt.Sprintf(" %d —\n</code>", diffInfo)
-	} else {
-		text += fmt.Sprintf(" %d 📉\n</code>", diffInfo)
-	}
 
 	return text
 }

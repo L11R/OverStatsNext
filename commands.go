@@ -24,7 +24,7 @@ func StartCommand(update tgbotapi.Update) {
 }
 
 func DonateCommand(update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "If you find this bot helpful, " +
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "If you find this bot helpful, "+
 		"<a href=\"https://paypal.me/krasovsky\">you can make small donation</a> to help me pay server bills!")
 	msg.ParseMode = "HTML"
 	bot.Send(msg)
@@ -86,15 +86,19 @@ func SaveCommand(update tgbotapi.Update) {
 
 func MeCommand(update tgbotapi.Update) {
 	user, err := GetUser(update.Message.From.ID)
-	var text string
-
 	if err != nil {
 		log.Warn(err)
-		text = fmt.Sprint("ERROR:\n<code>", err, "</code>")
-	} else {
-		log.Info("/me command executed successful")
-		text = MakeSummary(user)
+		return
 	}
+
+	place, err := GetRatingPlace(update.Message.From.ID)
+	if err != nil {
+		log.Warn(err)
+		return
+	}
+
+	log.Info("/me command executed successful")
+	text := MakeSummary(user, place)
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
 	msg.ParseMode = "HTML"
@@ -137,73 +141,4 @@ func RatingTopCommand(update tgbotapi.Update, platform string) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
 	msg.ParseMode = "HTML"
 	bot.Send(msg)
-}
-
-func SessionReport(change Change) {
-	// Check OldVal and NewOld existing
-	if change.OldVal.Profile != nil && change.NewVal.Profile != nil {
-		oldStats := Report{
-			Rating: change.OldVal.Profile.Rating,
-			Level:  change.OldVal.Profile.Prestige*100 + change.OldVal.Profile.Level,
-		}
-
-		if competitiveStats, ok := change.OldVal.Profile.CompetitiveStats.CareerStats["allHeroes"]; ok {
-			if gamesPlayed, ok := competitiveStats.Game["gamesPlayed"]; ok {
-				oldStats.Games = int(gamesPlayed.(float64))
-			}
-			if gamesWon, ok := competitiveStats.Game["gamesWon"]; ok {
-				oldStats.Wins = int(gamesWon.(float64))
-			}
-			if gamesTied, ok := competitiveStats.Miscellaneous["gamesTied"]; ok {
-				oldStats.Ties = int(gamesTied.(float64))
-			}
-			if gamesLost, ok := competitiveStats.Miscellaneous["gamesLost"]; ok {
-				oldStats.Losses = int(gamesLost.(float64))
-			}
-		}
-
-		newStats := Report{
-			Rating: change.NewVal.Profile.Rating,
-			Level:  change.NewVal.Profile.Prestige*100 + change.NewVal.Profile.Level,
-		}
-
-		if competitiveStats, ok := change.NewVal.Profile.CompetitiveStats.CareerStats["allHeroes"]; ok {
-			if gamesPlayed, ok := competitiveStats.Game["gamesPlayed"]; ok {
-				newStats.Games = int(gamesPlayed.(float64))
-			}
-			if gamesWon, ok := competitiveStats.Game["gamesWon"]; ok {
-				newStats.Wins = int(gamesWon.(float64))
-			}
-			if gamesTied, ok := competitiveStats.Miscellaneous["gamesTied"]; ok {
-				newStats.Ties = int(gamesTied.(float64))
-			}
-			if gamesLost, ok := competitiveStats.Miscellaneous["gamesLost"]; ok {
-				newStats.Losses = int(gamesLost.(float64))
-			}
-		}
-
-		diffStats := Report{
-			newStats.Rating - oldStats.Rating,
-			newStats.Level - oldStats.Level,
-			newStats.Games - oldStats.Games,
-			newStats.Wins - oldStats.Wins,
-			newStats.Ties - oldStats.Ties,
-			newStats.Losses - oldStats.Losses,
-		}
-
-		if diffStats.Games != 0 {
-			log.Infof("sending report to %d", change.NewVal.Id)
-			text := "<b>Session Report</b>\n\n"
-
-			text += AddInfo("Rating", oldStats.Rating, newStats.Rating, diffStats.Rating)
-			text += AddInfo("Wins", oldStats.Wins, newStats.Wins, diffStats.Wins)
-			text += AddInfo("Losses", oldStats.Losses, newStats.Losses, diffStats.Losses)
-			text += AddInfo("Ties", oldStats.Ties, newStats.Ties, diffStats.Ties)
-			text += AddInfo("Level", oldStats.Level, newStats.Level, diffStats.Level)
-
-			msg := tgbotapi.NewMessage(change.NewVal.Id, text)
-			msg.ParseMode = "HTML"
-			bot.Send(msg)
-		}
-	}
 }

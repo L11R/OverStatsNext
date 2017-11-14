@@ -61,9 +61,9 @@ func GetRatingTop(platform string, limit int) ([]User, error) {
 	)
 
 	if platform == "console" {
-		res, err = r.Table("users").Filter(r.Row.Field("region").Eq("psn").Or(r.Row.Field("region").Eq("xbl"))).OrderBy(r.Desc(r.Row.Field("profile").Field("Rating"))).Limit(limit).Run(session)
+		res, err = r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")}).Filter(r.Row.Field("region").Eq("psn").Or(r.Row.Field("region").Eq("xbl"))).Limit(limit).Run(session)
 	} else {
-		res, err = r.Table("users").Filter(r.Row.Field("region").Ne("psn").And(r.Row.Field("region").Ne("xbl"))).OrderBy(r.Desc(r.Row.Field("profile").Field("Rating"))).Limit(limit).Run(session)
+		res, err = r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")}).Filter(r.Row.Field("region").Ne("psn").And(r.Row.Field("region").Ne("xbl"))).Limit(limit).Run(session)
 	}
 
 	if err != nil {
@@ -80,22 +80,30 @@ func GetRatingTop(platform string, limit int) ([]User, error) {
 	return top, nil
 }
 
-func GetRank(id int64, hero string, fieldType string, field string) (float64, error) {
+func GetRatingPlace(id int) (Top, error) {
 	res, err := r.Do(
+		r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")}).OffsetsOf(r.Row.Field("id").Eq(id)).Nth(0),
+		r.Table("users").Count(),
+		func(place r.Term, count r.Term) r.Term {
+			return r.Expr(map[string]interface{}{"place": place, "rank": place.Div(count).Mul(100)})
+		},
+	).Run(session)
+	/*res, err := r.Do(
 		r.Table("users").Count(),
 		r.Table("users").OrderBy(r.Asc(r.Row.Field("profile").Field("CompetitiveStats").Field("CareerStats").Field(hero).Field(fieldType).Field(field))).OffsetsOf(r.Row.Field("id").Eq(id)).Nth(0),
 		func(count r.Term, position r.Term) r.Term {
 			return position.Div(count).Mul(100)
 		},
-	).Run(session)
+	).Run(session)*/
 
-	var rank float64
-	err = res.One(&rank)
+	var top Top
+	err = res.One(&top)
 	if err != nil {
-		return 0, err
+		log.Warn(err)
+		return Top{}, err
 	}
 
-	return rank, nil
+	return top, nil
 }
 
 func InsertUser(user User) (r.WriteResponse, error) {

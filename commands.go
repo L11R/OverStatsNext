@@ -54,6 +54,7 @@ func (hero Heroes) Swap(i, j int) {
 func SaveCommand(update tgbotapi.Update) {
 	info := strings.Split(update.Message.Text, " ")
 	var text string
+
 	if len(info) == 3 {
 		if info[1] != "psn" && info[1] != "xbl" {
 			info[2] = strings.Replace(info[2], "#", "-", -1)

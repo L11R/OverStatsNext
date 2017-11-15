@@ -35,8 +35,8 @@ func InitConnectionPool() {
 	}
 }
 
-func GetUser(ID int) (User, error) {
-	res, err := r.Table("users").Get(ID).Run(session)
+func GetUser(id int) (User, error) {
+	res, err := r.Table("users").Get(id).Run(session)
 	if err != nil {
 		return User{}, err
 	}
@@ -87,8 +87,8 @@ func GetRatingPlace(id int) (Top, error) {
 		func(place r.Term, count r.Term) r.Term {
 			return r.Expr(
 				map[string]interface{}{
-					"place": place,
-					"rank":  place.Div(count).Mul(100),
+					"place": place.Add(1),
+					"rank":  place.Sub(1).Div(count).Mul(100),
 				},
 			)
 		},

@@ -78,13 +78,14 @@ func main() {
 			go HeroCommand(update)
 		}
 
-		if strings.HasPrefix(update.Message.Text, "/ratingtop") {
-			commandLogger.Info("command /ratingtop triggered")
-			if strings.HasSuffix(update.Message.Text, "console") {
-				go RatingTopCommand(update, "console")
-			} else {
-				go RatingTopCommand(update, "pc")
-			}
+		if strings.HasPrefix(update.Message.Text, "/consoletop") {
+			commandLogger.Info("command /consoletop triggered")
+			go RatingTopCommand(update, "console")
+		}
+
+		if strings.HasPrefix(update.Message.Text, "/pctop") {
+			commandLogger.Info("command /pctop triggered")
+			go RatingTopCommand(update, "pc")
 		}
 	}
 }

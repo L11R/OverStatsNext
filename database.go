@@ -21,7 +21,7 @@ func InitConnectionPool() {
 		Database:   "OverStatsTelegram",
 	})
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal(err)
 	}
 
 	res, err := r.Table("users").Changes().Run(session)
@@ -85,7 +85,12 @@ func GetRatingPlace(id int) (Top, error) {
 		r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")}).OffsetsOf(r.Row.Field("id").Eq(id)).Nth(0),
 		r.Table("users").Count(),
 		func(place r.Term, count r.Term) r.Term {
-			return r.Expr(map[string]interface{}{"place": place, "rank": place.Div(count).Mul(100)})
+			return r.Expr(
+				map[string]interface{}{
+					"place": place,
+					"rank":  place.Div(count).Mul(100),
+				},
+			)
 		},
 	).Run(session)
 	/*res, err := r.Do(

@@ -101,7 +101,7 @@ func MakeHeroSummary(hero string, user User) string {
 			if err != nil {
 				text += fmt.Sprint(" (error)\n")
 			} else {
-				text += fmt.Sprintf(" (#%d, %0.2f%%)\n", res.Place, res.Rank)
+				text += fmt.Sprintf(" (#%d, %0.0f%%)\n", res.Place, res.Rank)
 			}
 
 			if eliminationsPerLife, ok := heroStats.Combat["eliminationsPerLife"]; ok {
@@ -115,7 +115,7 @@ func MakeHeroSummary(hero string, user User) string {
 				if err != nil {
 					text += fmt.Sprint(" (error)\n")
 				} else {
-					text += fmt.Sprintf(" (#%d, %0.2f%%)\n", res.Place, res.Rank)
+					text += fmt.Sprintf(" (#%d, %0.0f%%)\n", res.Place, res.Rank)
 				}
 			}
 
@@ -130,7 +130,7 @@ func MakeHeroSummary(hero string, user User) string {
 				if err != nil {
 					text += fmt.Sprint(" (error)\n")
 				} else {
-					text += fmt.Sprintf(" (#%d, %0.2f%%)\n", res.Place, res.Rank)
+					text += fmt.Sprintf(" (#%d, %0.0f%%)\n", res.Place, res.Rank)
 				}
 			}
 

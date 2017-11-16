@@ -112,9 +112,6 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 		stats = user.Profile.QuickPlayStats
 	}
 
-	// Base RethinkDB term for rank
-	rethinkTerm := r.Row.Field("profile").Field(mode)
-
 	if heroStats, ok := stats.CareerStats[hero]; ok {
 		if heroAdditionalStats, ok := stats.TopHeroes[hero]; ok {
 			text += fmt.Sprintf(" (%s)\n", heroAdditionalStats.TimePlayed)
@@ -138,8 +135,7 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 
 				res, err := GetRank(
 					user.Id,
-					mode+"/TopHeroes/"+hero+"/WinPercentage",
-					r.Table("users").Count(),
+					r.Row.Field("profile").Field(mode).Field("TopHeroes").Field(hero).Field("WinPercentage"),
 				)
 				if err != nil {
 					text += fmt.Sprint(" (error)\n")
@@ -153,8 +149,7 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 
 				res, err := GetRank(
 					user.Id,
-					mode+"/CareerStats/"+hero+"/Combat/eliminationsPerLife",
-					r.Table("users").Count(rethinkTerm.Field("CareerStats").Field(hero).Field("Combat").Field("eliminationsPerLife").Ne(0)),
+					r.Row.Field("profile").Field(mode).Field("CareerStats").Field(hero).Field("Combat").Field("eliminationsPerLife"),
 				)
 				if err != nil {
 					text += fmt.Sprint(" (error)\n")
@@ -168,8 +163,7 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 
 				res, err := GetRank(
 					user.Id,
-					mode+"/CareerStats/"+hero+"/Combat/weaponAccuracy",
-					r.Table("users").Count(rethinkTerm.Field("CareerStats").Field(hero).Field("Combat").Field("weaponAccuracy").Ne(0)),
+					r.Row.Field("profile").Field(mode).Field("CareerStats").Field(hero).Field("Combat").Field("weaponAccuracy"),
 				)
 				if err != nil {
 					text += fmt.Sprint(" (error)\n")

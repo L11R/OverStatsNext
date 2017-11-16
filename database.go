@@ -104,10 +104,10 @@ func GetRatingPlace(id int) (Top, error) {
 	return top, nil
 }
 
-func GetRank(id int64, index string, count r.Term) (Top, error) {
+func GetRank(id int64, index r.Term) (Top, error) {
 	res, err := r.Do(
-		r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc(index)}).OffsetsOf(r.Row.Field("id").Eq(id)).Nth(0),
-		count,
+		r.Table("users").OrderBy(r.Desc(index)).OffsetsOf(r.Row.Field("id").Eq(id)).Nth(0),
+		r.Table("users").Count(index.Ne(0)),
 		func(place r.Term, count r.Term) r.Term {
 			return r.Expr(
 				map[string]interface{}{

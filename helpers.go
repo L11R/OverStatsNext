@@ -10,26 +10,37 @@ import (
 )
 
 // Make small text summary based on profile
-func MakeSummary(user User, top Top) string {
-	profile := user.Profile
-	text := fmt.Sprintf("<b>%s</b> (<b>%d</b> sr / <b>%d</b> lvl)\n", profile.Name, profile.Rating, profile.Prestige*100+profile.Level)
+func MakeSummary(user User, top Top, mode string) string {
+	text := fmt.Sprintf("<b>%s</b> (<b>%d</b> sr / <b>%d</b> lvl)\n", user.Profile.Name, user.Profile.Rating, user.Profile.Prestige*100+user.Profile.Level)
 
-	if careerStats, ok := profile.CompetitiveStats.CareerStats["allHeroes"]; ok {
-		var stats Report
+	var stats ovrstat.StatsCollection
+	if mode == "CompetitiveStats" {
+		stats = user.Profile.CompetitiveStats
+	}
+	if mode == "QuickPlayStats" {
+		stats = user.Profile.QuickPlayStats
+	}
+
+	if careerStats, ok := stats.CareerStats["allHeroes"]; ok {
+		var basicStats Report
 		if gamesPlayed, ok := careerStats.Game["gamesPlayed"]; ok {
-			stats.Games = int(gamesPlayed.(float64))
+			basicStats.Games = int(gamesPlayed.(float64))
 		}
 		if gamesWon, ok := careerStats.Game["gamesWon"]; ok {
-			stats.Wins = int(gamesWon.(float64))
+			basicStats.Wins = int(gamesWon.(float64))
 		}
 		if gamesTied, ok := careerStats.Miscellaneous["gamesTied"]; ok {
-			stats.Ties = int(gamesTied.(float64))
+			basicStats.Ties = int(gamesTied.(float64))
 		}
 		if gamesLost, ok := careerStats.Miscellaneous["gamesLost"]; ok {
-			stats.Losses = int(gamesLost.(float64))
+			basicStats.Losses = int(gamesLost.(float64))
 		}
 
-		text += fmt.Sprintf("%d-%d-%d / <b>%0.2f%%</b> winrate\n", stats.Wins, stats.Losses, stats.Ties, float64(stats.Wins)/float64(stats.Games)*100)
+		if mode == "CompetitiveStats" {
+			text += fmt.Sprintf("%d-%d-%d / <b>%0.2f%%</b> winrate\n", basicStats.Wins, basicStats.Losses, basicStats.Ties, float64(basicStats.Wins)/float64(basicStats.Games)*100)
+		} else if mode == "QuickPlayStats" {
+			text += fmt.Sprintf("<b>%d</b> wins\n", basicStats.Wins)
+		}
 
 		// Temp struct for k/d counting
 		type KD struct {
@@ -56,7 +67,7 @@ func MakeSummary(user User, top Top) string {
 
 		text += "<b>7 top played heroes:</b>\n"
 		var topPlayedHeroes Heroes
-		for name, elem := range profile.CompetitiveStats.TopHeroes {
+		for name, elem := range stats.TopHeroes {
 			topPlayedHeroes = append(topPlayedHeroes, Hero{
 				Name:                name,
 				TimePlayedInSeconds: elem.TimePlayedInSeconds,
@@ -67,10 +78,17 @@ func MakeSummary(user User, top Top) string {
 		sort.Sort(sort.Reverse(topPlayedHeroes))
 
 		for i := 0; i < 7; i++ {
+			var format string
+			if mode == "CompetitiveStats" {
+				format = fmt.Sprint("%s (%s) /h_%s\n")
+			} else if mode == "QuickPlayStats" {
+				format = fmt.Sprint("%s (%s) /h_%s_quick\n")
+			}
+
 			text += fmt.Sprintf(
-				"%s (%s) /h_%s\n",
+				format,
 				strings.Title(strings.ToLower(topPlayedHeroes[i].Name)),
-				profile.CompetitiveStats.TopHeroes[topPlayedHeroes[i].Name].TimePlayed,
+				stats.TopHeroes[topPlayedHeroes[i].Name].TimePlayed,
 				topPlayedHeroes[i].Name,
 			)
 		}
@@ -81,15 +99,22 @@ func MakeSummary(user User, top Top) string {
 	return text
 }
 
-func MakeHeroSummary(hero string, user User) string {
-	profile := user.Profile
+func MakeHeroSummary(hero string, mode string, user User) string {
 	text := fmt.Sprintf("<b>%s</b>", strings.Title(strings.ToLower(hero)))
 
-	// Base RethinkDB term for rank
-	rethinkTerm := r.Row.Field("profile").Field("CompetitiveStats")
+	var stats ovrstat.StatsCollection
+	if mode == "CompetitiveStats" {
+		stats = user.Profile.CompetitiveStats
+	}
+	if mode == "QuickPlayStats" {
+		stats = user.Profile.QuickPlayStats
+	}
 
-	if heroStats, ok := profile.CompetitiveStats.CareerStats[hero]; ok {
-		if heroAdditionalStats, ok := profile.CompetitiveStats.TopHeroes[hero]; ok {
+	// Base RethinkDB term for rank
+	rethinkTerm := r.Row.Field("profile").Field(mode)
+
+	if heroStats, ok := stats.CareerStats[hero]; ok {
+		if heroAdditionalStats, ok := stats.TopHeroes[hero]; ok {
 			text += fmt.Sprintf(" (%s)\n", heroAdditionalStats.TimePlayed)
 			if cards, ok := heroStats.MatchAwards["cards"]; ok {
 				text += fmt.Sprintf("🃏%0.0f ", cards)
@@ -104,17 +129,21 @@ func MakeHeroSummary(hero string, user User) string {
 				text += fmt.Sprintf("🥉%0.0f ", medalsBronze)
 			}
 
-			text += fmt.Sprintf("\n<b>%d%%</b> hero winrate", heroAdditionalStats.WinPercentage)
+			text += "\n"
 
-			res, err := GetRank(
-				user.Id,
-				"TopHeroes/"+hero+"/WinPercentage",
-				r.Table("users").Count(),
-			)
-			if err != nil {
-				text += fmt.Sprint(" (error)\n")
-			} else {
-				text += fmt.Sprintf(" (#%d, %0.0f%%)\n", res.Place, res.Rank)
+			if mode == "CompetitiveStats" {
+				text += fmt.Sprintf("<b>%d%%</b> hero winrate", heroAdditionalStats.WinPercentage)
+
+				res, err := GetRank(
+					user.Id,
+					mode+"/TopHeroes/"+hero+"/WinPercentage",
+					r.Table("users").Count(),
+				)
+				if err != nil {
+					text += fmt.Sprint(" (error)\n")
+				} else {
+					text += fmt.Sprintf(" (#%d, %0.0f%%)\n", res.Place, res.Rank)
+				}
 			}
 
 			if eliminationsPerLife, ok := heroStats.Combat["eliminationsPerLife"]; ok {
@@ -122,7 +151,7 @@ func MakeHeroSummary(hero string, user User) string {
 
 				res, err := GetRank(
 					user.Id,
-					"CompetitiveStats/"+hero+"/Combat/eliminationsPerLife",
+					mode+"/CareerStats/"+hero+"/Combat/eliminationsPerLife",
 					r.Table("users").Count(rethinkTerm.Field("CareerStats").Field(hero).Field("Combat").Field("eliminationsPerLife").Ne(0)),
 				)
 				if err != nil {
@@ -137,7 +166,7 @@ func MakeHeroSummary(hero string, user User) string {
 
 				res, err := GetRank(
 					user.Id,
-					"CompetitiveStats/"+hero+"/Combat/weaponAccuracy",
+					mode+"/CareerStats/"+hero+"/Combat/weaponAccuracy",
 					r.Table("users").Count(rethinkTerm.Field("CareerStats").Field(hero).Field("Combat").Field("weaponAccuracy").Ne(0)),
 				)
 				if err != nil {

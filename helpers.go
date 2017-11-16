@@ -63,7 +63,9 @@ func MakeSummary(user User, top Top, mode string) string {
 			text += fmt.Sprintf("<b>%0.2f</b> k/d\n\n", kd.Ratio)
 		}
 
-		text += fmt.Sprintf("<b>Rating Top:</b>\n#%d (%0.2f%%)\n\n", top.Place, top.Rank)
+		if mode == "CompetitiveStats" {
+			text += fmt.Sprintf("<b>Rating Top:</b>\n#%d (%0.2f%%)\n\n", top.Place, top.Rank)
+		}
 
 		text += "<b>7 top played heroes:</b>\n"
 		var topPlayedHeroes Heroes

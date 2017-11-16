@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/sdwolfe32/ovrstat/ovrstat"
+	r "gopkg.in/gorethink/gorethink.v3"
 	"sort"
 	"strings"
 )
@@ -84,42 +85,58 @@ func MakeHeroSummary(hero string, user User) string {
 	profile := user.Profile
 	text := fmt.Sprintf("<b>%s</b>", strings.Title(strings.ToLower(hero)))
 
+	// Base RethinkDB term for rank
+	rethinkTerm := r.Row.Field("profile").Field("CompetitiveStats")
+
 	if heroStats, ok := profile.CompetitiveStats.CareerStats[hero]; ok {
 		if heroAdditionalStats, ok := profile.CompetitiveStats.TopHeroes[hero]; ok {
 			text += fmt.Sprintf(" (%s)\n", heroAdditionalStats.TimePlayed)
+			text += fmt.Sprintf("<b>%d%%</b> hero winrate", heroAdditionalStats.WinPercentage)
 
-			// Temp struct for winrate counting
-			type WR struct {
-				Wins  float64
-				Games float64
-				Ratio float64
+			res, err := GetRank(
+				user.Id,
+				"TopHeroes/"+hero+"/WinPercentage",
+				r.Table("users").Count(rethinkTerm.Field("TopHeroes").Field(hero).Field("WinPercentage").Ne(0)),
+			)
+			if err != nil {
+				text += fmt.Sprint(" (error)\n")
+			} else {
+				text += fmt.Sprintf(" (#%d, %0.2f%%)\n", res.Place, res.Rank)
 			}
 
-			var wr WR
+			if eliminationsPerLife, ok := heroStats.Combat["eliminationsPerLife"]; ok {
+				text += fmt.Sprintf("<b>%0.2f</b> k/d ratio", eliminationsPerLife)
 
-			if gamesWon, ok := heroStats.Game["gamesWon"]; ok {
-				wr.Wins = gamesWon.(float64)
-			}
-			if gamesPlayed, ok := heroStats.Game["gamesPlayed"]; ok {
-				wr.Games = gamesPlayed.(float64)
+				res, err := GetRank(
+					user.Id,
+					"CompetitiveStats/"+hero+"/Combat/eliminationsPerLife",
+					r.Table("users").Count(rethinkTerm.Field("CareerStats").Field(hero).Field("Combat").Field("eliminationsPerLife").Ne(0)),
+				)
+				if err != nil {
+					text += fmt.Sprint(" (error)\n")
+				} else {
+					text += fmt.Sprintf(" (#%d, %0.2f%%)\n", res.Place, res.Rank)
+				}
 			}
 
-			if wr.Games > 0 {
-				wr.Ratio = wr.Wins / wr.Games * 100
-				text += fmt.Sprintf("<b>%0.2f%%</b> hero winrate\n", wr.Ratio)
+			if accuracy, ok := heroStats.Combat["weaponAccuracy"]; ok {
+				text += fmt.Sprintf("<b>%s</b> accuracy", accuracy)
+
+				res, err := GetRank(
+					user.Id,
+					"CompetitiveStats/"+hero+"/Combat/weaponAccuracy",
+					r.Table("users").Count(rethinkTerm.Field("CareerStats").Field(hero).Field("Combat").Field("weaponAccuracy").Ne(0)),
+				)
+				if err != nil {
+					text += fmt.Sprint(" (error)\n")
+				} else {
+					text += fmt.Sprintf(" (#%d, %0.2f%%)\n", res.Place, res.Rank)
+				}
 			}
 
 			if eliminations, ok := heroStats.Combat["eliminations"]; ok {
 				eliminationsPerMin := eliminations.(float64) / (float64(heroAdditionalStats.TimePlayedInSeconds) / 60)
 				text += fmt.Sprintf("<b>%0.2f</b> eliminations per min\n", eliminationsPerMin)
-			}
-
-			if eliminationsPerLife, ok := heroStats.Combat["eliminationsPerLife"]; ok {
-				text += fmt.Sprintf("<b>%0.2f</b> k/d ratio\n", eliminationsPerLife)
-			}
-
-			if accuracy, ok := heroStats.Combat["weaponAccuracy"]; ok {
-				text += fmt.Sprintf("<b>%s</b> accuracy\n", accuracy)
 			}
 
 			if damageDone, ok := heroStats.Combat["damageDone"]; ok {

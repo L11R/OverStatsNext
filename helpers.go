@@ -134,7 +134,7 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 				text += fmt.Sprintf("<b>%d%%</b> hero winrate", heroAdditionalStats.WinPercentage)
 
 				res, err := GetRank(
-					dbPKPrefix+fmt.Sprint(user.Id),
+					fmt.Sprint(dbPKPrefix, user.Id),
 					r.Row.Field("profile").Field(mode).Field("TopHeroes").Field(hero).Field("WinPercentage"),
 				)
 				if err != nil {
@@ -148,7 +148,7 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 				text += fmt.Sprintf("<b>%0.2f</b> k/d ratio", eliminationsPerLife)
 
 				res, err := GetRank(
-					user.Id,
+					fmt.Sprint(dbPKPrefix, user.Id),
 					r.Row.Field("profile").Field(mode).Field("CareerStats").Field(hero).Field("Combat").Field("eliminationsPerLife"),
 				)
 				if err != nil {
@@ -162,7 +162,7 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 				text += fmt.Sprintf("<b>%s</b> accuracy", accuracy)
 
 				res, err := GetRank(
-					user.Id,
+					fmt.Sprint(dbPKPrefix, user.Id),
 					r.Row.Field("profile").Field(mode).Field("CareerStats").Field(hero).Field("Combat").Field("weaponAccuracy"),
 				)
 				if err != nil {

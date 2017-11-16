@@ -66,7 +66,7 @@ func SaveCommand(update tgbotapi.Update) {
 			text = "Player not found!"
 		} else {
 			_, err := InsertUser(User{
-				Id:      int64(update.Message.From.ID),
+				Id:      fmt.Sprint(dbPKPrefix, update.Message.From.ID),
 				Profile: profile,
 				Region:  info[1],
 				Nick:    info[2],
@@ -89,13 +89,13 @@ func SaveCommand(update tgbotapi.Update) {
 }
 
 func MeCommand(update tgbotapi.Update) {
-	user, err := GetUser(update.Message.From.ID)
+	user, err := GetUser(fmt.Sprint(dbPKPrefix, update.Message.From.ID))
 	if err != nil {
 		log.Warn(err)
 		return
 	}
 
-	place, err := GetRatingPlace(update.Message.From.ID)
+	place, err := GetRatingPlace(fmt.Sprint(dbPKPrefix, update.Message.From.ID))
 	if err != nil {
 		log.Warn(err)
 		return
@@ -118,7 +118,7 @@ func MeCommand(update tgbotapi.Update) {
 }
 
 func HeroCommand(update tgbotapi.Update) {
-	user, err := GetUser(update.Message.From.ID)
+	user, err := GetUser(fmt.Sprint(dbPKPrefix, update.Message.From.ID))
 	if err != nil {
 		log.Warn(err)
 		return

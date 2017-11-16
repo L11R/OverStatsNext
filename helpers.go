@@ -134,7 +134,7 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 				text += fmt.Sprintf("<b>%d%%</b> hero winrate", heroAdditionalStats.WinPercentage)
 
 				res, err := GetRank(
-					user.Id,
+					dbPKPrefix+fmt.Sprint(user.Id),
 					r.Row.Field("profile").Field(mode).Field("TopHeroes").Field(hero).Field("WinPercentage"),
 				)
 				if err != nil {

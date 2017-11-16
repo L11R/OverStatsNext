@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"strconv"
+	"strings"
 )
 
 func SessionReport(change Change) {
@@ -80,7 +82,8 @@ func SessionReport(change Change) {
 			text += AddDiffString("Ties", oldStats.Ties, newStats.Ties, diffStats.Ties)
 			text += AddDiffString("Level", oldStats.Level, newStats.Level, diffStats.Level)
 
-			msg := tgbotapi.NewMessage(change.NewVal.Id, text)
+			id, _ := strconv.ParseInt(strings.Split(change.NewVal.Id, ":")[1], 10, 64)
+			msg := tgbotapi.NewMessage(id, text)
 			msg.ParseMode = "HTML"
 			bot.Send(msg)
 		}

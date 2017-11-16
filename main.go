@@ -12,8 +12,9 @@ import (
 var log = logrus.New()
 
 var (
-	bot     *tgbotapi.BotAPI
-	session *r.Session
+	bot        *tgbotapi.BotAPI
+	session    *r.Session
+	dbPKPrefix = "tg:"
 )
 
 func main() {

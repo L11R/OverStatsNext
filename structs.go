@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	Id      int64                `gorethink:"id"`
+	Id      string               `gorethink:"id"`
 	Profile *ovrstat.PlayerStats `gorethink:"profile"`
 	Nick    string               `gorethink:"nick"`
 	Region  string               `gorethink:"region"`

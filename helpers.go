@@ -332,7 +332,7 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 				}
 				if coalescenceHealing, ok := heroStats.Miscellaneous["coalescenceHealing"]; ok {
 					coalescenceHealingPerMin := coalescenceHealing.(float64) / timePlayedInMinutes
-					text += fmt.Sprintf("<b>%0.2f</b> coalescence healing done per min\n", coalescenceHealingPerMin)
+					text += fmt.Sprintf("<b>%0.0f</b> coalescence healing done per min\n", coalescenceHealingPerMin)
 				}
 			case "orisa":
 				if damageAmplified, ok := heroStats.Miscellaneous["damageAmplified"]; ok {

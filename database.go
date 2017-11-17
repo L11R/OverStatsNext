@@ -146,3 +146,16 @@ func InsertUser(user User) (r.WriteResponse, error) {
 
 	return res, nil
 }
+
+func IncertAuth(id string) (r.WriteResponse, error) {
+	res, err := r.Table("auth").Insert(
+		map[string]interface{}{
+			"userid": id,
+		},
+	).RunWrite(session)
+	if err != nil {
+		return r.WriteResponse{}, err
+	}
+
+	return res, nil
+}

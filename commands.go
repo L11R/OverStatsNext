@@ -88,6 +88,19 @@ func SaveCommand(update tgbotapi.Update) {
 	bot.Send(msg)
 }
 
+func AuthCommand(update tgbotapi.Update) {
+	res, err := IncertAuth(fmt.Sprint(dbPKPrefix, update.Message.From.ID))
+	if err != nil {
+		log.Warn(err)
+		return
+	}
+	text := fmt.Sprintf("<a href=\"vpn.krasovsky.me:7000/login?salt=%s/\">Auth via Battle.Net</a>", res.GeneratedKeys[0])
+
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
+	msg.ParseMode = "HTML"
+	bot.Send(msg)
+}
+
 func MeCommand(update tgbotapi.Update) {
 	user, err := GetUser(fmt.Sprint(dbPKPrefix, update.Message.From.ID))
 	if err != nil {

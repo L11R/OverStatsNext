@@ -94,7 +94,7 @@ func AuthCommand(update tgbotapi.Update) {
 		log.Warn(err)
 		return
 	}
-	text := fmt.Sprintf("<a href=\"vpn.krasovsky.me:7000/login?salt=%s/\">Auth via Battle.Net</a>", res.GeneratedKeys[0])
+	text := fmt.Sprintf("<a href=\"vpn.krasovsky.me:7000/login?salt=%s\">Auth via Battle.Net</a>", res.GeneratedKeys[0])
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
 	msg.ParseMode = "HTML"

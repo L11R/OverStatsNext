@@ -24,7 +24,9 @@ func InitConnectionPool() {
 		log.Fatal(err)
 	}
 
-	res, err := r.Table("users").Changes().Run(session)
+	res, err := r.Table("users").Filter(func(user r.Term) r.Term {
+		return user.Field("id").Match("^tg")
+	}).Changes().Run(session)
 	if err != nil {
 		log.Fatal(err)
 	}

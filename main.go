@@ -69,11 +69,6 @@ func main() {
 			go SaveCommand(update)
 		}
 
-		if strings.HasPrefix(update.Message.Text, "/auth") {
-			commandLogger.Info("command /auth triggered")
-			go AuthCommand(update)
-		}
-
 		if strings.HasPrefix(update.Message.Text, "/me") {
 			commandLogger.Info("command /me triggered")
 			go MeCommand(update)

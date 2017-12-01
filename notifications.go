@@ -22,10 +22,10 @@ func SessionReport(change Change) {
 			if gamesWon, ok := competitiveStats.Game["gamesWon"]; ok {
 				oldStats.Wins = int(gamesWon.(float64))
 			}
-			if gamesTied, ok := competitiveStats.Miscellaneous["gamesTied"]; ok {
+			if gamesTied, ok := competitiveStats.Game["gamesTied"]; ok {
 				oldStats.Ties = int(gamesTied.(float64))
 			}
-			if gamesLost, ok := competitiveStats.Miscellaneous["gamesLost"]; ok {
+			if gamesLost, ok := competitiveStats.Game["gamesLost"]; ok {
 				oldStats.Losses = int(gamesLost.(float64))
 			}
 		}

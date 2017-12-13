@@ -11,7 +11,7 @@ type User struct {
 	Nick    string               `gorethink:"nick"`
 	Region  string               `gorethink:"region"`
 	Date    time.Time            `gorethink:"date"`
-	Patron  string               `gorethink:"patron"`
+	Patreon string               `gorethink:"patreon"`
 }
 
 type Change struct {

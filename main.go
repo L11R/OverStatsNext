@@ -54,6 +54,26 @@ func main() {
 		// userId for logger
 		commandLogger := log.WithFields(logrus.Fields{"user_id": update.Message.From.ID})
 
+		if strings.HasPrefix(update.Message.Text, "/setchat") {
+			commandLogger.Info("command /setchat triggered")
+			go SetChatCommand(update)
+		}
+
+		if strings.HasPrefix(update.Message.Text, "/consoletop") {
+			commandLogger.Info("command /consoletop triggered")
+			go RatingTopCommand(update, "console")
+		}
+
+		if strings.HasPrefix(update.Message.Text, "/pctop") {
+			commandLogger.Info("command /pctop triggered")
+			go RatingTopCommand(update, "pc")
+		}
+
+		// Skip all commands from groups and supergroups
+		if update.Message.Chat.ID != int64(update.Message.From.ID) {
+			continue
+		}
+
 		if strings.HasPrefix(update.Message.Text, "/start") {
 			commandLogger.Info("command /start triggered")
 			go StartCommand(update)
@@ -77,16 +97,6 @@ func main() {
 		if strings.HasPrefix(update.Message.Text, "/h_") {
 			commandLogger.Info("command /h_ triggered")
 			go HeroCommand(update)
-		}
-
-		if strings.HasPrefix(update.Message.Text, "/consoletop") {
-			commandLogger.Info("command /consoletop triggered")
-			go RatingTopCommand(update, "console")
-		}
-
-		if strings.HasPrefix(update.Message.Text, "/pctop") {
-			commandLogger.Info("command /pctop triggered")
-			go RatingTopCommand(update, "pc")
 		}
 	}
 }

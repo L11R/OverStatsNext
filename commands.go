@@ -142,7 +142,12 @@ func HeroCommand(update tgbotapi.Update) {
 }
 
 func RatingTopCommand(update tgbotapi.Update, platform string) {
-	top, err := GetRatingTop(platform, 20)
+	var chatId int64
+	if update.Message.Chat.Type == "private" {
+		chatId = 0
+	}
+
+	top, err := GetRatingTop(platform, 20, chatId)
 	if err != nil {
 		log.Warn(err)
 		return
@@ -155,6 +160,29 @@ func RatingTopCommand(update tgbotapi.Update, platform string) {
 			nick = strings.Replace(nick, "-", "#", -1)
 		}
 		text += fmt.Sprintf("%d. %s (%d)\n", i+1, nick, top[i].Profile.Rating)
+	}
+
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
+	msg.ParseMode = "HTML"
+	bot.Send(msg)
+}
+
+func SetChatCommand(update tgbotapi.Update) {
+	res, err := UpdateUser(User{
+		Id:   fmt.Sprint("tg:", update.Message.From.ID),
+		Chat: update.Message.Chat.ID,
+	})
+	if err != nil {
+		log.Warn(err)
+		return
+	}
+
+	var text string
+	if res.Unchanged != 0 {
+		text = "<b>Error:</b> This chat already set as primary!"
+	}
+	if res.Replaced != 0 || res.Updated != 0 {
+		text = "<b>Done:</b> Set as primary chat!"
 	}
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)

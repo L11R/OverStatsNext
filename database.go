@@ -56,16 +56,24 @@ func GetUser(id string) (User, error) {
 	return user, nil
 }
 
-func GetRatingTop(platform string, limit int) ([]User, error) {
+func GetRatingTop(platform string, limit int, chat int64) ([]User, error) {
 	var (
 		res *r.Cursor
 		err error
 	)
 
 	if platform == "console" {
-		res, err = r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")}).Filter(r.Row.Field("region").Eq("psn").Or(r.Row.Field("region").Eq("xbl"))).Limit(limit).Run(session)
+		if chat != 0 {
+			res, err = r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")}).Filter(r.Row.Field("region").Eq("psn").Or(r.Row.Field("region").Eq("xbl")).And(r.Row.Field("chat").Eq(chat))).Limit(limit).Run(session)
+		} else {
+			res, err = r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")}).Filter(r.Row.Field("region").Eq("psn").Or(r.Row.Field("region").Eq("xbl"))).Limit(limit).Run(session)
+		}
 	} else {
-		res, err = r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")}).Filter(r.Row.Field("region").Ne("psn").And(r.Row.Field("region").Ne("xbl"))).Limit(limit).Run(session)
+		if chat != 0 {
+			res, err = r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")}).Filter(r.Row.Field("region").Ne("psn").And(r.Row.Field("region").Ne("xbl")).And(r.Row.Field("chat").Eq(chat))).Limit(limit).Run(session)
+		} else {
+			res, err = r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")}).Filter(r.Row.Field("region").Ne("psn").And(r.Row.Field("region").Ne("xbl"))).Limit(limit).Run(session)
+		}
 	}
 
 	if err != nil {
@@ -142,6 +150,20 @@ func InsertUser(user User) (r.WriteResponse, error) {
 	res, err := r.Table("users").Insert(newDoc, r.InsertOpts{
 		Conflict: "replace",
 	}).RunWrite(session)
+	if err != nil {
+		return r.WriteResponse{}, err
+	}
+
+	return res, nil
+}
+
+func UpdateUser(user User) (r.WriteResponse, error) {
+	newDoc := map[string]interface{}{
+		"id":   user.Id,
+		"chat": user.Chat,
+	}
+
+	res, err := r.Table("users").Get(user.Id).Update(newDoc).RunWrite(session)
 	if err != nil {
 		return r.WriteResponse{}, err
 	}

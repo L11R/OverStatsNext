@@ -163,6 +163,9 @@ func RatingTopCommand(update tgbotapi.Update, platform string) {
 		}
 		text += fmt.Sprintf("%d. %s (%d)\n", i+1, nick, top[i].Profile.Rating)
 	}
+	if len(top) == 0 {
+		text += "It's empty..."
+	}
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
 	msg.ParseMode = "HTML"

@@ -62,19 +62,17 @@ func GetRatingTop(platform string, limit int, chat int64) ([]User, error) {
 		err error
 	)
 
+	query := r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")})
 	if platform == "console" {
-		if chat != 0 {
-			res, err = r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")}).Filter(r.Row.Field("region").Eq("psn").Or(r.Row.Field("region").Eq("xbl")).And(r.Row.Field("chat").Eq(chat))).Limit(limit).Run(session)
-		} else {
-			res, err = r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")}).Filter(r.Row.Field("region").Eq("psn").Or(r.Row.Field("region").Eq("xbl"))).Limit(limit).Run(session)
-		}
+		query = query.Filter(r.Row.Field("region").Eq("psn").Or(r.Row.Field("region").Eq("xbl")))
 	} else {
-		if chat != 0 {
-			res, err = r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")}).Filter(r.Row.Field("region").Ne("psn").And(r.Row.Field("region").Ne("xbl")).And(r.Row.Field("chat").Eq(chat))).Limit(limit).Run(session)
-		} else {
-			res, err = r.Table("users").OrderBy(r.OrderByOpts{Index: r.Desc("rating")}).Filter(r.Row.Field("region").Ne("psn").And(r.Row.Field("region").Ne("xbl"))).Limit(limit).Run(session)
-		}
+		query = query.Filter(r.Row.Field("region").Ne("psn").And(r.Row.Field("region").Ne("xbl")))
 	}
+	if chat != 0 {
+		query = query.Filter(r.Row.Field("chat").Eq(chat))
+	}
+
+	res, err = query.Limit(limit).Run(session)
 
 	if err != nil {
 		return []User{}, err

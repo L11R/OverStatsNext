@@ -145,6 +145,8 @@ func RatingTopCommand(update tgbotapi.Update, platform string) {
 	var chatId int64
 	if update.Message.Chat.Type == "private" {
 		chatId = 0
+	} else {
+		chatId = update.Message.Chat.ID
 	}
 
 	top, err := GetRatingTop(platform, 20, chatId)

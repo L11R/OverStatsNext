@@ -156,12 +156,12 @@ func RatingTopCommand(update tgbotapi.Update, platform string) {
 	}
 
 	text := "<b>Rating Top:</b>\n"
-	for i := range top {
-		nick := top[i].Nick
-		if top[i].Region != "psn" && top[i].Region != "xbl" {
+	for i, elem := range top {
+		nick := elem.Patreon + elem.Nick
+		if elem.Region != "psn" && elem.Region != "xbl" {
 			nick = strings.Replace(nick, "-", "#", -1)
 		}
-		text += fmt.Sprintf("%d. %s (%d)\n", i+1, nick, top[i].Profile.Rating)
+		text += fmt.Sprintf("%d. %s (%d)\n", i+1, nick, elem.Profile.Rating)
 	}
 	if len(top) == 0 {
 		text += "It's empty..."
@@ -173,6 +173,11 @@ func RatingTopCommand(update tgbotapi.Update, platform string) {
 }
 
 func SetChatCommand(update tgbotapi.Update) {
+	// Skip if it's private
+	if update.Message.Chat.Type == "private" {
+		return
+	}
+
 	res, err := UpdateUser(User{
 		Id:   fmt.Sprint("tg:", update.Message.From.ID),
 		Chat: update.Message.Chat.ID,

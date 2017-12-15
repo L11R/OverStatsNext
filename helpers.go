@@ -29,10 +29,10 @@ func MakeSummary(user User, top Top, mode string) string {
 		if gamesWon, ok := careerStats.Game["gamesWon"]; ok {
 			basicStats.Wins = int(gamesWon.(float64))
 		}
-		if gamesTied, ok := careerStats.Miscellaneous["gamesTied"]; ok {
+		if gamesTied, ok := careerStats.Game["gamesTied"]; ok {
 			basicStats.Ties = int(gamesTied.(float64))
 		}
-		if gamesLost, ok := careerStats.Miscellaneous["gamesLost"]; ok {
+		if gamesLost, ok := careerStats.Game["gamesLost"]; ok {
 			basicStats.Losses = int(gamesLost.(float64))
 		}
 

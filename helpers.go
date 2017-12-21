@@ -211,7 +211,7 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 				if scopedAccuracy, ok := heroStats.HeroSpecific["scopedAccuracy"]; ok {
 					text += fmt.Sprintf("<b>%s</b> scoped accuracy\n", scopedAccuracy)
 				}
-				if enemiesSlept, ok := heroStats.Miscellaneous["enemiesSlept"]; ok {
+				if enemiesSlept, ok := heroStats.HeroSpecific["enemiesSlept"]; ok {
 					enemiesSleptPerMin := enemiesSlept.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.2f</b> enemies slept per min\n", enemiesSleptPerMin)
 				}
@@ -241,7 +241,7 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 					mechDeathsPerMin := mechDeaths.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.2f</b> mech deaths per min\n", mechDeathsPerMin)
 				}
-				if selfDestructKills, ok := heroStats.Miscellaneous["selfDestructKills"]; ok {
+				if selfDestructKills, ok := heroStats.HeroSpecific["selfDestructKills"]; ok {
 					selfDestructKillsPerMin := selfDestructKills.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.2f</b> self destruct kills per min\n", selfDestructKillsPerMin)
 				}
@@ -313,11 +313,11 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 					text += fmt.Sprintf("<b>%0.2f</b> enemies frozen per min\n", enemiesFrozenPerMin)
 				}
 			case "mercy":
-				if damageAmplified, ok := heroStats.Miscellaneous["damageAmplified"]; ok {
+				if damageAmplified, ok := heroStats.HeroSpecific["damageAmplified"]; ok {
 					damageAmplifiedPerMin := damageAmplified.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.0f</b> damage amplified per min\n", damageAmplifiedPerMin)
 				}
-				if blasterKills, ok := heroStats.Miscellaneous["blasterKills"]; ok {
+				if blasterKills, ok := heroStats.HeroSpecific["blasterKills"]; ok {
 					blasterKillsPerMin := blasterKills.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.2f</b> blaster kills per min\n", blasterKillsPerMin)
 				}
@@ -326,18 +326,26 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 					text += fmt.Sprintf("<b>%0.2f</b> players resurrected per min\n", playersResurrectedPerMin)
 				}
 			case "moira":
-				if coalescenceKills, ok := heroStats.Miscellaneous["coalescenceKills"]; ok {
+				if selfHealing, ok := heroStats.HeroSpecific["selfHealing"]; ok {
+					selfHealingPerMin := selfHealing.(float64) / timePlayedInMinutes
+					text += fmt.Sprintf("<b>%0.2f</b> self healing per min\n", selfHealingPerMin)
+				}
+				if coalescenceKills, ok := heroStats.HeroSpecific["coalescenceKills"]; ok {
 					coalescenceKillsPerMin := coalescenceKills.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.2f</b> coalescence kills per min\n", coalescenceKillsPerMin)
 				}
-				if coalescenceHealing, ok := heroStats.Miscellaneous["coalescenceHealing"]; ok {
+				if coalescenceHealing, ok := heroStats.HeroSpecific["coalescenceHealing"]; ok {
 					coalescenceHealingPerMin := coalescenceHealing.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.0f</b> coalescence healing done per min\n", coalescenceHealingPerMin)
 				}
 			case "orisa":
-				if damageAmplified, ok := heroStats.Miscellaneous["damageAmplified"]; ok {
+				if damageAmplified, ok := heroStats.HeroSpecific["damageAmplified"]; ok {
 					damageAmplifiedPerMin := damageAmplified.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.0f</b> damage amplified per min\n", damageAmplifiedPerMin)
+				}
+				if damageBlocked, ok := heroStats.HeroSpecific["damageBlocked"]; ok {
+					damageBlockedPerMin := damageBlocked.(float64) / timePlayedInMinutes
+					text += fmt.Sprintf("<b>%0.0f</b> damage blocked per min\n", damageBlockedPerMin)
 				}
 			case "pharah":
 				if barrageKills, ok := heroStats.HeroSpecific["barrageKills"]; ok {
@@ -353,7 +361,7 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 					deathsBlossomKillsPerMin := deathsBlossomKills.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.2f</b> blossom kills per min\n", deathsBlossomKillsPerMin)
 				}
-				if selfHealing, ok := heroStats.Assists["selfHealing"]; ok {
+				if selfHealing, ok := heroStats.HeroSpecific["selfHealing"]; ok {
 					selfHealingPerMin := selfHealing.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.0f</b> self healing per min\n", selfHealingPerMin)
 				}
@@ -400,11 +408,11 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 					text += fmt.Sprintf("<b>%0.0f</b> healing done per min\n", bioticFieldHealingDonePerMin)
 				}
 			case "sombra":
-				if enemiesHacked, ok := heroStats.Miscellaneous["enemiesHacked"]; ok {
+				if enemiesHacked, ok := heroStats.HeroSpecific["enemiesHacked"]; ok {
 					enemiesHackedPerMin := enemiesHacked.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.2f</b> enemies hacked per min\n", enemiesHackedPerMin)
 				}
-				if enemiesEmpd, ok := heroStats.Miscellaneous["enemiesEmpd"]; ok {
+				if enemiesEmpd, ok := heroStats.HeroSpecific["enemiesEmpd"]; ok {
 					enemiesEmpdPerMin := enemiesEmpd.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.2f</b> enemies emp'd per min\n", enemiesEmpdPerMin)
 				}
@@ -489,15 +497,19 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 					text += fmt.Sprintf("<b>%0.0f%%</b> average energy\n", averageEnergy.(float64)*100)
 				}
 			case "zenyatta":
-				if transcendenceHealing, ok := heroStats.Miscellaneous["transcendenceHealing"]; ok {
+				if transcendenceHealing, ok := heroStats.HeroSpecific["transcendenceHealing"]; ok {
 					transcendenceHealingPerMin := transcendenceHealing.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.0f</b> transcendence healing per min\n", transcendenceHealingPerMin)
+				}
+				if selfHealing, ok := heroStats.HeroSpecific["selfHealing"]; ok {
+					selfHealingPerMin := selfHealing.(float64) / timePlayedInMinutes
+					text += fmt.Sprintf("<b>%0.0f</b> self healing per min\n", selfHealingPerMin)
 				}
 				if offensiveAssists, ok := heroStats.Assists["offensiveAssists"]; ok {
 					offensiveAssistsPerMin := offensiveAssists.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.2f</b> offensive assists per min\n", offensiveAssistsPerMin)
 				}
-				if defensiveAssists, ok := heroStats.Miscellaneous["defensiveAssists"]; ok {
+				if defensiveAssists, ok := heroStats.Assists["defensiveAssists"]; ok {
 					defensiveAssistsPerMin := defensiveAssists.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.2f</b> defensive assists per min\n", defensiveAssistsPerMin)
 				}

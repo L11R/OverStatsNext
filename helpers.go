@@ -184,12 +184,7 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 				text += fmt.Sprintf("<b>%0.0f</b> damage per min\n", damagePerMin)
 			}
 
-			if blocked, ok := heroStats.Miscellaneous["damageBlocked"]; ok {
-				blockedPerMin := blocked.(float64) / timePlayedInMinutes
-				text += fmt.Sprintf("<b>%0.0f</b> blocked per min\n", blockedPerMin)
-			}
-
-			if healing, ok := heroStats.Miscellaneous["healingDone"]; ok {
+			if healing, ok := heroStats.Assists["healingDone"]; ok {
 				healingPerMin := healing.(float64) / timePlayedInMinutes
 				text += fmt.Sprintf("<b>%0.0f</b> healing per min\n", healingPerMin)
 			}
@@ -468,7 +463,7 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 					jumpPackKillsPerMin := jumpPackKills.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.2f</b> jump pack kills per min\n", jumpPackKillsPerMin)
 				}
-				if primalRageKills, ok := heroStats.Miscellaneous["primalRageKills"]; ok {
+				if primalRageKills, ok := heroStats.HeroSpecific["primalRageKills"]; ok {
 					primalRageKillsPerMin := primalRageKills.(float64) / timePlayedInMinutes
 					text += fmt.Sprintf("<b>%0.2f</b> primal rage kills per min\n", primalRageKillsPerMin)
 				}

@@ -14,7 +14,7 @@ func InitConnectionPool() {
 		log.Fatal("DB env variable not specified")
 	}
 
-	dbPass := os.Getenv("DB")
+	dbPass := os.Getenv("DBPASS")
 	if dbUrl == "" {
 		log.Fatal("DBPASS env variable not specified")
 	}

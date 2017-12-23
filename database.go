@@ -11,7 +11,12 @@ func InitConnectionPool() {
 
 	dbUrl := os.Getenv("DB")
 	if dbUrl == "" {
-		log.Fatal("db env variable not specified")
+		log.Fatal("DB env variable not specified")
+	}
+
+	dbPass := os.Getenv("DB")
+	if dbUrl == "" {
+		log.Fatal("DBPASS env variable not specified")
 	}
 
 	session, err = r.Connect(r.ConnectOpts{
@@ -19,6 +24,7 @@ func InitConnectionPool() {
 		InitialCap: 10,
 		MaxOpen:    10,
 		Database:   "OverStats",
+		Password:   dbPass,
 	})
 	if err != nil {
 		log.Fatal(err)

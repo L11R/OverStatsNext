@@ -54,7 +54,7 @@ func MakeSummary(user User, top Top, mode string) string {
 		if eliminations, ok := careerStats.Combat["eliminations"]; ok {
 			kd.Eliminations = eliminations.(float64)
 		}
-		if deaths, ok := careerStats.Deaths["deaths"]; ok {
+		if deaths, ok := careerStats.Combat["deaths"]; ok {
 			kd.Deaths = deaths.(float64)
 		}
 
@@ -69,10 +69,10 @@ func MakeSummary(user User, top Top, mode string) string {
 
 		text += "<b>7 top played heroes:</b>\n"
 		var topPlayedHeroes Heroes
-		for name, elem := range stats.TopHeroes {
+		for name, hero := range stats.TopHeroes {
 			topPlayedHeroes = append(topPlayedHeroes, Hero{
 				Name:                name,
-				TimePlayedInSeconds: elem.TimePlayedInSeconds,
+				TimePlayedInSeconds: hero.TimePlayedInSeconds,
 			})
 		}
 
@@ -182,6 +182,11 @@ func MakeHeroSummary(hero string, mode string, user User) string {
 			if damageDone, ok := heroStats.Combat["damageDone"]; ok {
 				damagePerMin := damageDone.(float64) / timePlayedInMinutes
 				text += fmt.Sprintf("<b>%0.0f</b> damage per min\n", damagePerMin)
+			}
+
+			if blocked, ok := heroStats.Miscellaneous["damageBlocked"]; ok {
+				blockedPerMin := blocked.(float64) / timePlayedInMinutes
+				text += fmt.Sprintf("<b>%0.0f</b> blocked per min\n", blockedPerMin)
 			}
 
 			if healing, ok := heroStats.Assists["healingDone"]; ok {
